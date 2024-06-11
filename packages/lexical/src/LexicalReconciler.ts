@@ -49,13 +49,6 @@ import {
 
 type IntentionallyMarkedAsDirtyElement = boolean;
 
-declare global {
-  interface Node {
-    __lexicalLineBreak?: HTMLBRElement | null;
-    __lexicalLineBreakImg?: HTMLImageElement | null;
-  }
-}
-
 let subTreeTextContent = '';
 let subTreeDirectionedTextContent = '';
 let subTreeTextFormat: number | null = null;
@@ -244,6 +237,7 @@ function $createNode(
       parentDOM.insertBefore(dom, insertDOM);
     } else {
       const possibleLineBreak =
+        // @ts-expect-error: internal field
         parentDOM.__lexicalLineBreakImg || parentDOM.__lexicalLineBreak;
 
       if (possibleLineBreak != null) {
@@ -344,12 +338,12 @@ function reconcileElementTerminatingLineBreak(
 
   if (prevLineBreak) {
     if (!nextLineBreak) {
-      const removeElement = (
-        fieldName: '__lexicalLineBreak' | '__lexicalLineBreakImg',
-      ) => {
+      const removeElement = (fieldName: string) => {
+        // @ts-expect-error: internal field
         const element = dom[fieldName];
         if (element != null) {
           dom.removeChild(element);
+          // @ts-expect-error: internal field
           dom[fieldName] = null;
         }
       };
@@ -363,6 +357,7 @@ function reconcileElementTerminatingLineBreak(
     if (IS_SAFARI) {
       insertCursorFixElement(dom, element);
     }
+    // @ts-expect-error: internal field
     dom.__lexicalLineBreak = element;
     dom.appendChild(element);
   }
@@ -382,6 +377,7 @@ function insertCursorFixElement(
   styles.setProperty('margin', '0', 'important');
 
   dom.appendChild(element);
+  // @ts-expect-error: internal field
   dom.__lexicalLineBreakImg = element;
 }
 
@@ -561,6 +557,7 @@ function $reconcileChildren(
       }
     } else if (nextChildrenSize === 0) {
       if (prevChildrenSize !== 0) {
+        // @ts-expect-error: internal field
         const lexicalLineBreak = dom.__lexicalLineBreak;
         const canUseFastPath = lexicalLineBreak == null;
         destroyChildren(
